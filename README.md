@@ -1,4 +1,4 @@
-# Bren PhD Worksho Day 5 - Loading, viewing, working with spatial data 
+# Bren PhD Workshop Day 5 - Loading, viewing, working with spatial data 
 
 A quick example of working with spatial data in R using the `sf` package. 
 More on `sf`: https://r-spatial.github.io/sf/
