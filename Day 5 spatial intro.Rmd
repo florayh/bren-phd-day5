@@ -1,0 +1,27 @@
+---
+title: "Day 5 spatial intro"
+author: "Yifan (Flora) He"
+date: "9/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(sf)
+library(tmap)
+```
+
+# read data
+```{r}
+ca_eco <- read_sf(here("data", "ca_ecoregions"), layer = "ca_eco") %>% 
+  select(US_L3NAME) %>% # geometry stays 
+  rename(region = US_L3NAME) %>% 
+  st_simplify(dTolerance = 1000) #simply
+plot(ca_eco)
+
+ggplot(data = ca_eco)+
+  geom_sf(aes(fill = region))
+```
+
