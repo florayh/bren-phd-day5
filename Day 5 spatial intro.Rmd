@@ -13,7 +13,7 @@ library(sf)
 library(tmap)
 ```
 
-# read data
+# read and plot data
 ```{r}
 ca_eco <- read_sf(here("data", "ca_ecoregions"), layer = "ca_eco") %>% 
   select(US_L3NAME) %>% # geometry stays 
@@ -23,5 +23,74 @@ plot(ca_eco)
 
 ggplot(data = ca_eco)+
   geom_sf(aes(fill = region))
+
+```
+
+## spatial transformation
+```{r}
+st_crs(ca_eco) #check projection system
+ca_eco<- ca_eco %>% 
+  st_transform (crs = 4326)
+```
+
+## read additional data
+
+```{r}
+ca_counties <- read_sf(dsn = here("data", "ca_counties"), layer = "ca_counties")
+st_crs(ca_counties)
+st_crs(ca_counties) = 4326 # define projection
+ca_dams <- read_sf (dsn = here("data", "ca_dams"), layer = "ca_dams")
+st_crs(ca_dams)
+st_transform(ca_dams, crs = 4326)
+```
+
+## ggplot of different layers
+```{r}
+# start with base layer
+ggplot(data = ca_counties)+
+  geom_sf(color = "gray", size = 0.1)+
+  geom_sf(data = ca_eco, 
+          aes(fill = region),  # if using a variable - put it in aes 
+          alpha = 0.3, # set transparency
+          color = "NA") + # no border color
+  geom_sf(data = ca_dams,
+          size = 0.5,
+          alpha = 0.4)+
+  theme_minimal()
+
+```
+## spatial wrangling
+
+join dam and eco-region, filtered to only dams in sierra nevada eco-region
+
+```{r}
+sn <- ca_eco %>% 
+  filter(region == "Sierra Nevada") %>% 
+  st_join(ca_dams) # join dams with Sierra Nevada data
+
+ggplot(data = sn) + 
+  geom_sf(fill = "purple")+
+  geom_point(aes(x = Longitude, y = Latitude), color = "yellow")
+
+```
+## Eco-region in SB county
+```{r}
+sb <- ca_counties %>% 
+  filter(NAME == "Santa Barbara")
+
+eco_clip <- st_intersection (ca_eco, sb)
+
+ggplot(data = eco_clip)+
+  geom_sf(aes(fill = region))
+  
+```
+## make it interactive
+```{r}
+sb_clip_tmap <- tm_basemap("Esri.WorldImagery") + 
+  tm_shape(eco_clip)+
+  tm_fill("region", palette = c("orange", "purple", "yellow"), alpha = 0.5)
+
+tmap_mode("view")
+sb_clip_tmap
 ```
 
